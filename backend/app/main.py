@@ -7,7 +7,10 @@ from uuid import uuid4
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
-from weasyprint import HTML
+# NOTE: PDF export via WeasyPrint is disabled in this deployment to keep the
+# Render service buildable without system libs (Cairo/Pango). The PDF endpoints
+# below return 501. Re-enable by adding `weasyprint` to requirements.txt and
+# switching back to a Docker runtime that installs the native dependencies.
 
 from app.core.schemas import (
     AdHocExportArtifact,
