@@ -31,15 +31,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const initials =
-    user?.full_name
-      ?.split(" ")
-      .map((p) => p[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() ??
-    user?.email?.[0]?.toUpperCase() ??
-    "?";
+  const initials = user?.email?.[0]?.toUpperCase() ?? "?";
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -99,11 +91,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                     {initials}
                   </div>
                   <div className="hidden text-left leading-tight sm:block">
-                    <div className="text-sm font-medium">
-                      {user?.full_name ?? user?.email}
-                    </div>
+                    <div className="text-sm font-medium">{user?.email}</div>
                     <div className="text-[11px] text-muted-foreground">
-                      {user?.roles?.[0] ?? "user"}
+                      Signed in
                     </div>
                   </div>
                 </Button>
