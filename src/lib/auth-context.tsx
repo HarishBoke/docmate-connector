@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { authApi, type Role, type User } from "./auth-api";
+import { authApi, type User } from "./auth-api";
 import { tokenStore } from "./token-store";
 
 interface AuthContextValue {
@@ -15,8 +15,8 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  hasRole: (role: Role | Role[]) => boolean;
   refresh: () => Promise<void>;
 }
 
@@ -37,10 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Bootstrap session: if we have a refresh token, try to hydrate the user.
     (async () => {
-      const refresh = tokenStore.getRefreshToken();
-      if (!refresh && !tokenStore.getAccessToken()) {
+      if (!tokenStore.getAccessToken()) {
         setIsLoading(false);
         return;
       }
@@ -49,31 +47,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, [fetchMe]);
 
+  const applySession = useCallback(
+    (res: { access_token: string; user: User }) => {
+      tokenStore.setAccessToken(res.access_token);
+      setUser(res.user);
+    },
+    [],
+  );
+
   const login = useCallback(
     async (email: string, password: string) => {
       const res = await authApi.login(email, password);
-      tokenStore.setAccessToken(res.access_token);
-      if (res.refresh_token) tokenStore.setRefreshToken(res.refresh_token);
-      if (res.user) setUser(res.user);
-      else await fetchMe();
+      applySession(res);
     },
-    [fetchMe],
+    [applySession],
+  );
+
+  const signup = useCallback(
+    async (email: string, password: string) => {
+      const res = await authApi.signup(email, password);
+      applySession(res);
+    },
+    [applySession],
   );
 
   const logout = useCallback(async () => {
-    await authApi.logout();
     tokenStore.clear();
     setUser(null);
   }, []);
-
-  const hasRole = useCallback(
-    (role: Role | Role[]) => {
-      if (!user) return false;
-      const wanted = Array.isArray(role) ? role : [role];
-      return wanted.some((r) => user.roles?.includes(r));
-    },
-    [user],
-  );
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -81,11 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       isAuthenticated: !!user,
       login,
+      signup,
       logout,
-      hasRole,
       refresh: fetchMe,
     }),
-    [user, isLoading, login, logout, hasRole, fetchMe],
+    [user, isLoading, login, signup, logout, fetchMe],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
