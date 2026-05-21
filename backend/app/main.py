@@ -307,7 +307,7 @@ def export_html_package(payload: GeneratedHtmlPayload) -> AdHocExportArtifact:
 @app.post("/api/v1/exports/pdf-package", response_model=AdHocExportArtifact)
 def export_pdf_package(payload: GeneratedHtmlPayload) -> AdHocExportArtifact:
     target = EXPORT_DIR / _safe_export_name(payload.filename, "pdf")
-    HTML(string=payload.html, base_url=str(ROOT_DIR)).write_pdf(target)
+    raise HTTPException(status_code=501, detail="PDF export is disabled on this deployment. Use the HTML export instead.")
     return AdHocExportArtifact(format="pdf", filename=target.name, media_type="application/pdf", bytes_written=target.stat().st_size, download_url=f"/api/v1/exports/{target.name}")
 
 
