@@ -1,6 +1,6 @@
-fastapi==0.124.4
-uvicorn[standard]==0.38.0
-pydantic==2.12.5
-beautifulsoup4==4.14.2
-python-multipart==0.0.21
-requests
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.10.4
+beautifulsoup4==4.12.3
+python-multipart==0.0.20
+requests==2.32.3
