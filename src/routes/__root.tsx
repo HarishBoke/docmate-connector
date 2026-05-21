@@ -88,6 +88,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "NextGen Health Document CMS" },
+      { name: "description", content: "Health Docs Hub is a content management system for healthcare documentation, integrating with GitHub repositories." },
+      { property: "og:description", content: "Health Docs Hub is a content management system for healthcare documentation, integrating with GitHub repositories." },
+      { name: "twitter:description", content: "Health Docs Hub is a content management system for healthcare documentation, integrating with GitHub repositories." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c3fbbb8b-3462-44a0-a608-58e0ef9a8ae3/id-preview-567204f4--56bf117b-60da-473a-9a64-6cf3d41bbc1f.lovable.app-1779351593065.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c3fbbb8b-3462-44a0-a608-58e0ef9a8ae3/id-preview-567204f4--56bf117b-60da-473a-9a64-6cf3d41bbc1f.lovable.app-1779351593065.png" },
     ],
     links: [
       {
