@@ -266,7 +266,7 @@ def export_pdf(document_id: str) -> ExportArtifact:
     report = run_document_preflight(document, template)
     html = _render_accessible_html(document, template)
     target = EXPORT_DIR / f"{document.id}.pdf"
-    HTML(string=html, base_url=str(ROOT_DIR)).write_pdf(target)
+    raise HTTPException(status_code=501, detail="PDF export is disabled on this deployment. Use the HTML export instead.")
     return ExportArtifact(document_id=document.id, format="pdf", filename=target.name, media_type="application/pdf", bytes_written=target.stat().st_size, compliance=report)
 
 
