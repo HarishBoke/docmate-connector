@@ -7,7 +7,10 @@ from uuid import uuid4
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
-from weasyprint import HTML
+# NOTE: PDF export via WeasyPrint is disabled in this deployment to keep the
+# Render service buildable without system libs (Cairo/Pango). The PDF endpoints
+# below return 501. Re-enable by adding `weasyprint` to requirements.txt and
+# switching back to a Docker runtime that installs the native dependencies.
 
 from app.core.schemas import (
     AdHocExportArtifact,
@@ -263,7 +266,7 @@ def export_pdf(document_id: str) -> ExportArtifact:
     report = run_document_preflight(document, template)
     html = _render_accessible_html(document, template)
     target = EXPORT_DIR / f"{document.id}.pdf"
-    HTML(string=html, base_url=str(ROOT_DIR)).write_pdf(target)
+    raise HTTPException(status_code=501, detail="PDF export is disabled on this deployment. Use the HTML export instead.")
     return ExportArtifact(document_id=document.id, format="pdf", filename=target.name, media_type="application/pdf", bytes_written=target.stat().st_size, compliance=report)
 
 
@@ -304,7 +307,7 @@ def export_html_package(payload: GeneratedHtmlPayload) -> AdHocExportArtifact:
 @app.post("/api/v1/exports/pdf-package", response_model=AdHocExportArtifact)
 def export_pdf_package(payload: GeneratedHtmlPayload) -> AdHocExportArtifact:
     target = EXPORT_DIR / _safe_export_name(payload.filename, "pdf")
-    HTML(string=payload.html, base_url=str(ROOT_DIR)).write_pdf(target)
+    raise HTTPException(status_code=501, detail="PDF export is disabled on this deployment. Use the HTML export instead.")
     return AdHocExportArtifact(format="pdf", filename=target.name, media_type="application/pdf", bytes_written=target.stat().st_size, download_url=f"/api/v1/exports/{target.name}")
 
 
