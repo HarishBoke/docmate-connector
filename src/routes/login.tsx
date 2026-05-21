@@ -19,24 +19,33 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { login } = useAuth();
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
   const { redirect } = useSearch({ from: "/login" });
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const isSignup = mode === "signup";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
-      navigate({ to: (redirect as any) || "/documents" });
+      if (isSignup) await signup(email, password);
+      else await login(email, password);
+      const target = redirect && redirect !== "/login" ? redirect : "/documents";
+      navigate({ to: target as any });
     } catch (err) {
       setError(
-        err instanceof ApiError ? err.message : "Unable to sign in. Try again.",
+        err instanceof ApiError
+          ? err.message
+          : isSignup
+          ? "Unable to create account. Try again."
+          : "Unable to sign in. Try again.",
       );
     } finally {
       setSubmitting(false);
@@ -73,9 +82,13 @@ function LoginPage() {
       <div className="flex items-center justify-center bg-background p-6">
         <form onSubmit={onSubmit} className="w-full max-w-sm space-y-6">
           <div className="space-y-1">
-            <h2 className="text-2xl font-semibold tracking-tight">Sign in</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">
+              {isSignup ? "Create your account" : "Sign in"}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              Use your organization account to access the CMS.
+              {isSignup
+                ? "Use a work email and a password of at least 8 characters."
+                : "Use your organization account to access the CMS."}
             </p>
           </div>
 
@@ -94,17 +107,20 @@ function LoginPage() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Forgot password?
-                </Link>
+                {!isSignup && (
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Forgot password?
+                  </Link>
+                )}
               </div>
               <Input
                 id="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={isSignup ? "new-password" : "current-password"}
+                minLength={isSignup ? 8 : undefined}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -123,11 +139,21 @@ function LoginPage() {
 
           <Button type="submit" disabled={submitting} className="w-full">
             {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign in
+            {isSignup ? "Create account" : "Sign in"}
           </Button>
 
           <p className="text-center text-xs text-muted-foreground">
-            Protected by JWT. Sessions are bound to your IP and audited.
+            {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
+            <button
+              type="button"
+              className="font-medium text-foreground hover:underline"
+              onClick={() => {
+                setError(null);
+                setMode(isSignup ? "signin" : "signup");
+              }}
+            >
+              {isSignup ? "Sign in" : "Sign up"}
+            </button>
           </p>
         </form>
       </div>

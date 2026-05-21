@@ -23,12 +23,15 @@ function SettingsPage() {
           <Input value={user?.email ?? ""} readOnly />
         </div>
         <div className="space-y-1.5">
-          <Label>Name</Label>
-          <Input value={user?.full_name ?? ""} readOnly />
-        </div>
-        <div className="space-y-1.5">
-          <Label>Roles</Label>
-          <Input value={(user?.roles ?? []).join(", ")} readOnly />
+          <Label>Account created</Label>
+          <Input
+            value={
+              user?.created_at
+                ? new Date(user.created_at).toLocaleString()
+                : ""
+            }
+            readOnly
+          />
         </div>
       </div>
     </div>
